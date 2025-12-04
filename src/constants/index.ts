@@ -7,3 +7,11 @@ export const navLinks = [
   { name: 'Vision', href: '/vision' },
   { name: 'AirPods', href: '/airpods' },
 ];
+
+// Parts of the MacBook model that should NOT change color
+// These are typically keyboard, screen, logos, camera, etc.
+export const noChangeParts = [
+  'Object_123', // Screen
+  'Object_107', // Keyboard
+  // Add other mesh names here if they shouldn't change color
+];

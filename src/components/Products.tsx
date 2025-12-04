@@ -1,96 +1,60 @@
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { useProductStore } from '../store/productStore';
-import { Model as Macbook14 } from './models/Macbook14';
-import { Model as Macbook16 } from './models/Macbook16';
-import { StudioLights } from './StudioLights';
+import { useProductStore } from "../store/productStore";
+import clsx from "clsx";
+import {Canvas} from "@react-three/fiber";
+import {Box, OrbitControls} from "@react-three/drei";
+import MacbookModel14 from "./models/Macbook14.jsx";
 
-const colors = [
-  { name: 'Space Gray', value: '#9ca3af' },
-  { name: 'Silver', value: '#e5e7eb' },
-  { name: 'Space Black', value: '#1f2937' },
-];
+import StudioLights from "./StudioLights.jsx";
+import ModelSwitcher from './ModelSwitcher.jsx'
+import {useMediaQuery} from "react-responsive";
 
-const sizes = [14, 16];
+const ProductViewer = () => {
+    const { color, scale, setColor, setScale } = useProductStore();
 
-const colorNames: Record<string, string> = {
-  '#9ca3af': 'Space Gray',
-  '#e5e7eb': 'Silver',
-  '#1f2937': 'Space Black',
-};
+    const isMobile = useMediaQuery({ query: '(max-width: 1024px)'});
 
-function Products() {
-  const { color, size, setColor, setSize } = useProductStore();
+    return (
+        <section id="product-viewer">
+            <h2>Take a closer look.</h2>
 
-  return (
-    <section className="min-h-screen bg-black text-white py-20 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="h-[600px] mb-12">
-          <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
-            <StudioLights />
-            {size === 14 ? (
-              <Macbook14 scale={0.05} />
-            ) : (
-              <Macbook16 scale={0.055} />
-            )}
-            <OrbitControls enableZoom={false} />
-          </Canvas>
-        </div>
+            <div className="controls">
+                {/*<p className="info">Macbook Pro | Available in 14" & 16" in Space Gray & Dark colors</p>*/}
 
-        <div className="text-center">
-          <h2 className="text-5xl font-bold mb-8">Take a closer look</h2>
+                <div className="flex-center gap-5 mt-5">
+                    <div className="color-control">
+                        <div
+                            onClick={() => setColor('#adb5bd')}
+                            className={clsx('bg-neutral-300', color === '#adb5bd' && 'active')}
+                        />
+                        <div
+                            onClick={() => setColor('#2e2c2e')}
+                            className={clsx('bg-neutral-900', color === '#2e2c2e' && 'active')}
+                        />
+                    </div>
 
-          <div className="mb-8">
-            <p className="text-xl text-gray-400 mb-4">
-              MacBook Pro {size}" in {colorNames[color]}
-            </p>
-          </div>
-
-          <div className="mb-8">
-            <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
-              Color
-            </p>
-            <div className="flex justify-center gap-4">
-              {colors.map((c) => (
-                <button
-                  key={c.value}
-                  onClick={() => setColor(c.value)}
-                  className={`w-12 h-12 rounded-full border-2 transition-all ${
-                    color === c.value
-                      ? 'border-white scale-110'
-                      : 'border-gray-600 hover:border-gray-400'
-                  }`}
-                  style={{ backgroundColor: c.value }}
-                  aria-label={c.name}
-                />
-              ))}
+                    <div className="size-control">
+                        <div
+                            onClick={() => setScale(0.06)}
+                            className={clsx(scale === 0.06 ? 'bg-white text-black' : 'bg-transparent text-white')}
+                        >
+                            <p>14"</p>
+                        </div>
+                        <div
+                            onClick={() => setScale(0.08)}
+                            className={clsx(scale === 0.08 ? 'bg-white text-black' : 'bg-transparent text-white')}
+                        >
+                            <p>16"</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
 
-          <div>
-            <p className="text-sm text-gray-500 uppercase tracking-wider mb-4">
-              Size
-            </p>
-            <div className="flex justify-center gap-4">
-              {sizes.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => setSize(s)}
-                  className={`px-8 py-3 rounded-full border-2 transition-all ${
-                    size === s
-                      ? 'border-white bg-white text-black'
-                      : 'border-gray-600 hover:border-gray-400'
-                  }`}
-                >
-                  {s}"
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+            <Canvas id="canvas" camera={{ position: [0, 2, 5], fov: 50, near: 0.1, far: 100}}>
+                <StudioLights />
+
+                <ModelSwitcher scale={isMobile ? scale - 0.03 : scale} isMobile={isMobile} />
+            </Canvas>
+        </section>
+    )
 }
-
-export default Products
+export default ProductViewer
