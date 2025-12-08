@@ -25,16 +25,7 @@ export default function MacbookModel14(props) {
   useEffect(() => {
     scene.traverse((child) => {
         if(child.isMesh) {
-            // Clone material to avoid shared reference issues
-            if (!child.material.isCloned) {
-                child.material = child.material.clone();
-                child.material.isCloned = true;
-            }
-
-            if(child.name === 'Object_107') {
-                // Force keyboard to always be black
-                child.material.color = new Color('#000000');
-            } else if(!noChangeParts.includes(child.name)) {
+            if(!noChangeParts.includes(child.name)) {
                 child.material.color = new Color(color);
             }
         }

@@ -10,6 +10,7 @@ const Performance = () => {
   const cardsRef = useRef([])
   const centralCardRef = useRef(null)
   const descriptionRef = useRef(null)
+  const ghostCardRef = useRef(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -17,7 +18,7 @@ const Performance = () => {
         scrollTrigger: {
           trigger: centralCardRef.current,
           start: 'top bottom',
-          end: 'top center',
+          end: 'bottom center',
           scrub: 1,
         },
       })
@@ -94,15 +95,38 @@ const Performance = () => {
         )
       })
 
-      // Trova la card più in basso (p2 ha bottom: 55)
-      const lowestCard = cardsRef.current[1] // p2 è all'indice 1
-      if (lowestCard && descriptionRef.current) {
-        // Posiziona la descrizione sotto la card più in basso
+      // Calcola la posizione del testo usando la ghost card
+      const lowestCardIndex = 3 // p4
+      const lowestCardPos = getCardPosition(performanceImages[lowestCardIndex].id)
+
+      if (descriptionRef.current && ghostCardRef.current && lowestCardPos.bottom) {
+        // Posiziona la ghost card esattamente dove finirà la card reale
+        const bottomValue = parseFloat(lowestCardPos.bottom.replace('%', ''))
+        const cardFinalY = (100 - bottomValue) - 50 // offset dal centro in vh
+
+        gsap.set(ghostCardRef.current, {
+          y: `${cardFinalY}vh`,
+        })
+
+        // Calcola la posizione usando getBoundingClientRect sulla ghost card
+        const ghostRect = ghostCardRef.current.getBoundingClientRect()
+        const viewportHeight = window.innerHeight
+        const cardBottom = ghostRect.bottom
+        const viewportCenter = viewportHeight / 2
+        const offsetFromCenter = (cardBottom - viewportCenter) / viewportHeight * 100 // in vh
+
+        // Posiziona il testo sotto la card con un padding
+        const textY = offsetFromCenter + 1.5 // +1.5vh di padding
+
+        gsap.set(descriptionRef.current, {
+          y: `${textY}vh`,
+        })
+
+        // Anima solo l'opacity del testo
         tl.to(
           descriptionRef.current,
           {
             opacity: 1,
-            y: 0,
             ease: 'power2.inOut',
             duration: 1,
           },
@@ -155,7 +179,7 @@ const Performance = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative h-fit bg-black overflow-hidden -mt-20"
+      className="relative bg-black overflow-hidden"
     >
       <div className="sticky top-0 h-screen flex items-center justify-center">
         <div className="relative w-full h-full">
@@ -189,11 +213,19 @@ const Performance = () => {
               className="w-full h-auto rounded-2xl shadow-2xl"
             />
           </div>
+
+          {/* Ghost card invisibile per calcolare la posizione del testo */}
+          <div
+            ref={ghostCardRef}
+            className="absolute top-1/2 left-1/2 w-64 md:w-80 lg:w-96 opacity-0 pointer-events-none"
+            aria-hidden="true"
+          >
+            <div className="w-full aspect-[16/10]"></div>
+          </div>
         </div>
         <div
           ref={descriptionRef}
-          className="absolute left-0 right-0 text-center z-20 px-4 opacity-0"
-          style={{ bottom: '8%' }}
+          className="absolute top-1/2 left-0 right-0 text-center z-20 px-4 opacity-0"
         >
           <p className="text-white text-lg md:text-xl lg:text-2xl font-semibold max-w-4xl mx-auto">
             Potenza rivoluzionaria. Efficienza senza precedenti. Performance che ridefiniscono ogni limite.

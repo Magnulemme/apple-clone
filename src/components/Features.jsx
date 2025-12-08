@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { featureSequence } from '../constants'
+import { featureSequence, features } from '../constants'
 import { useProductStore } from '../store/productStore'
 import MacbookFeatures from './models/MacbookFeatures'
 import StudioLights from './StudioLights'
@@ -34,10 +34,22 @@ const Features = () => {
   const canvasRef = useRef(null)
   const videoRefs = useRef([])
   const sectionRef = useRef(null)
+  const textRefs = useRef([])
   const currentVideoIndex = useRef(0)
   const [scrollProgress, setScrollProgress] = useState(0)
 
   const { setTexture, setScale } = useProductStore()
+  const [isDesktop, setIsDesktop] = useState(false)
+
+  // Monitora il resize per aggiornare isDesktop
+  useEffect(() => {
+    const handleResize = () => {
+      setIsDesktop(window.innerWidth >= 768)
+    }
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Precarica i video e setup texture
   useEffect(() => {
@@ -88,52 +100,78 @@ const Features = () => {
   useEffect(() => {
     if (!canvasRef.current) return
 
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: canvasRef.current,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: 1,
-        pin: true,
-        onUpdate: (self) => {
-          const progress = self.progress
+    let ctx
+    let refreshTimeout
 
-          // Aggiorna stato scroll progress per la rotazione
-          setScrollProgress(progress)
+    // Aspetta che il Canvas sia montato
+    const timeout = setTimeout(() => {
+      ctx = gsap.context(() => {
+        // Imposta la posizione iniziale di tutti i testi
+        gsap.set(textRefs.current, { opacity: 0 })
 
-          // Calcola quale video mostrare
-          const newIndex = Math.min(
-            Math.floor(progress * featureSequence.length),
-            featureSequence.length - 1
-          )
+        // TIMELINE UNIFICATA - gestisce sia rotazione che testi
+        const isDesktopView = window.innerWidth >= 768
 
-          // Cambia video solo se l'indice è cambiato
-          if (newIndex !== currentVideoIndex.current && videoRefs.current[newIndex]) {
-            currentVideoIndex.current = newIndex
-            const video = videoRefs.current[newIndex]
-            video.currentTime = 0
-            video.play()
-            const texture = new VideoTexture(video)
-            texture.colorSpace = SRGBColorSpace
-            texture.needsUpdate = true
-            setTexture(texture)
+        const mainTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: canvasRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 1,
+            pin: true,
+            id: 'features-pin',
+            onUpdate: (self) => {
+              // Aggiorna la rotazione del modello
+              setScrollProgress(self.progress)
+            }
           }
-        },
-      })
-    }, canvasRef)
+        })
 
-    return () => ctx.revert()
-  }, [setTexture, setScrollProgress])
+        // Aggiungi animazioni testi e cambio video alla timeline principale
+        features.forEach((feature, index) => {
+          mainTimeline
+            .call(() => {
+              // Cambia video
+              if (videoRefs.current[index]) {
+                const video = videoRefs.current[index]
+                video.currentTime = 0
+                video.play()
+                const texture = new VideoTexture(video)
+                texture.colorSpace = SRGBColorSpace
+                texture.needsUpdate = true
+                setTexture(texture)
+              }
+            })
+            .to(textRefs.current[index], {
+              opacity: 1,
+            })
+            .to(textRefs.current[index], {
+              opacity: 0,
+              y: isDesktopView ? -50 : 0, // Sposta in alto solo su desktop
+              ease: 'power2.in'
+            })
+        })
+
+        // Refresh dopo la creazione
+        refreshTimeout = setTimeout(() => ScrollTrigger.refresh(), 100)
+      })
+    }, 100)
+
+    return () => {
+      clearTimeout(timeout)
+      clearTimeout(refreshTimeout)
+      ctx?.revert()
+    }
+  }, [setTexture])
 
   return (
     <section
       ref={sectionRef}
-      className="relative bg-red-900/20 border-4 border-red-500"
+      className="relative min-h-screen"
     >
-      {/* Canvas fisso con il modello 3D */}
       <div
         ref={canvasRef}
-        className="h-screen w-full bg-blue-900/20 border-4 border-blue-500"
+        className="h-screen w-full"
       >
         <Canvas className="w-full h-full">
           <StudioLights />
@@ -151,32 +189,43 @@ const Features = () => {
           />
         </Canvas>
 
-        {/* Contenuto testuale - temporaneamente nascosto per testare */}
-        {/* <div className="absolute inset-0 pointer-events-none">
-          {features.map((feature, index) => (
-            <div
-              key={feature.id}
-              ref={(el) => (contentRefs.current[index] = el)}
-              className={`absolute ${feature.styles.replace('opacity-0 translate-y-5', '')}`}
-            >
-              <div className="flex items-start gap-4 max-w-md bg-black/60 backdrop-blur-sm p-6 rounded-2xl border border-white/10">
-                <img
-                  src={feature.icon}
-                  alt={feature.highlight}
-                  className="w-12 h-12 shrink-0"
-                />
-                <div>
-                  <h3 className="text-white text-xl font-semibold mb-2">
-                    {feature.highlight}
+        {/* Contenuto testuale con animazioni */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          {features.map((feature, index) => {
+            // Alterna posizione sinistra/destra solo su desktop
+            const isLeft = index % 2 === 0
+            // Posizione verticale: fissa in alto su mobile, graduale su desktop
+            const topPercentage = 20 + (index * 12) // 20%, 32%, 44%, 56%, 68% (solo desktop)
+
+            // Emoji diverse per ogni feature
+            const emojis = ['🚀', '⚡', '💎', '🎯', '🔥']
+            const emoji = emojis[index % emojis.length]
+
+            return (
+              <div
+                key={feature.id}
+                ref={(el) => (textRefs.current[index] = el)}
+                className={`absolute w-full max-w-lg px-6 md:px-8
+                  left-1/2 -translate-x-1/2 md:translate-x-0
+                  ${isLeft ? 'md:left-16 lg:left-20' : 'md:left-auto md:right-16 lg:right-20'}
+                `}
+                style={{
+                  // Su mobile: tutti al 20%, su desktop: posizioni graduate
+                  top: isDesktop ? `${topPercentage}%` : '20%'
+                }}
+              >
+                <div className="space-y-3 text-center md:text-left p-6 md:p-0">
+                  <h3 className="text-white text-2xl md:text-3xl font-bold">
+                    {emoji} {feature.highlight}
                   </h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <p className="text-gray-300 text-base md:text-lg leading-relaxed max-w-md">
                     {feature.text}
                   </p>
                 </div>
               </div>
-            </div>
-          ))}
-        </div> */}
+            )
+          })}
+        </div>
       </div>
     </section>
   )

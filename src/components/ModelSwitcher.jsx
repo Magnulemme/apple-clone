@@ -26,13 +26,11 @@ const moveGroup = (group, x) => {
 }
 
 const ModelSwitcher = ({ scale, isMobile }) => {
-    const SCALE_LARGE_DESKTOP = 0.08;
-    const SCALE_LARGE_MOBILE = 0.05;
-
     const smallMacbookRef = useRef();
     const largeMacbookRef = useRef();
 
-    const showLargeMacbook = scale === SCALE_LARGE_DESKTOP || scale === SCALE_LARGE_MOBILE;
+    // 0.06 = 16", 0.05 = 14"
+    const showLargeMacbook = scale === 0.06;
 
     useGSAP(() => {
         if(showLargeMacbook) {
@@ -55,20 +53,21 @@ const ModelSwitcher = ({ scale, isMobile }) => {
         speed: 1,
         zoom: 1,
         azimuth: [-Infinity, Infinity],
+        polar: isMobile ? [-Math.PI / 12, Math.PI / 12] : [-Math.PI / 36, Math.PI / 36],
         config: {mass:1, tension: 0, friction: 26}
     }
 
     return (
         <>
             <PresentationControls {...controlsConfig}>
-                <group ref={largeMacbookRef}>
-                    <MacbookModel16 scale={isMobile ? 0.05 : 0.08} />
+                <group ref={largeMacbookRef} position={[0, -0.5, 0]} rotation={[0.3, 0, 0]}>
+                    <MacbookModel16 scale={0.07} />
                 </group>
             </PresentationControls>
 
             <PresentationControls {...controlsConfig}>
-                <group ref={smallMacbookRef}>
-                    <MacbookModel14 scale={isMobile ? 0.03 : 0.06} />
+                <group ref={smallMacbookRef} position={[0, -0.5, 0]} rotation={[0.3, 0, 0]}>
+                    <MacbookModel14 scale={0.06} />
                 </group>
             </PresentationControls>
         </>
