@@ -37,22 +37,19 @@ Questo progetto ricrea l'esperienza visiva e interattiva del sito ufficiale **Ap
 <table>
 <tr>
 <td width="33%" align="center">
-<img src="https://img.icons8.com/color/96/000000/3d.png" width="64"/>
-<br/>
+<h3>🎲</h3>
 <b>Rendering 3D</b>
 <br/>
 Modelli realistici con Three.js
 </td>
 <td width="33%" align="center">
-<img src="https://img.icons8.com/color/96/000000/animation.png" width="64"/>
-<br/>
+<h3>✨</h3>
 <b>Animazioni Fluide</b>
 <br/>
 GSAP + ScrollTrigger
 </td>
 <td width="33%" align="center">
-<img src="https://img.icons8.com/color/96/000000/responsive.png" width="64"/>
-<br/>
+<h3>📱</h3>
 <b>Design Responsive</b>
 <br/>
 Mobile-first approach
@@ -98,7 +95,7 @@ Mobile-first approach
 
 Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interazioni uniche:
 
-<details open>
+<details>
 <summary><b>1️⃣ Navbar</b> - Navigazione Fixed</summary>
 
 ```
@@ -108,7 +105,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>2️⃣ Hero Section</b> - Prima Impressione</summary>
 
 ```
@@ -123,7 +120,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>3️⃣ Products Section</b> - Selezione Modello</summary>
 
 ```
@@ -142,7 +139,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>4️⃣ Showcase Section</b> - Video Features</summary>
 
 ```
@@ -158,7 +155,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>5️⃣ Performance Section</b> - Chip Gallery</summary>
 
 ```
@@ -180,7 +177,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>6️⃣ Features Section</b> - 3D Interactive</summary>
 
 ```
@@ -213,7 +210,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>7️⃣ Highlights Section</b> - Masonry Grid</summary>
 
 ```
@@ -232,7 +229,7 @@ Il sito è composto da **7 sezioni principali**, ognuna con animazioni e interaz
 ```
 </details>
 
-<details open>
+<details>
 <summary><b>8️⃣ Footer</b> - Informazioni Finali</summary>
 
 ```
