@@ -14,7 +14,7 @@ const Hero = () => {
     <section className="relative w-full bg-black text-white overflow-hidden">
       <div className="max-w-[1024px] mx-auto px-5 py-20">
         {/* Titolo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-16">
           <h1 className="text-5xl md:text-7xl font-semibold mb-6">
             Macbook Pro
           </h1>
